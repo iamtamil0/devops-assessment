@@ -29,7 +29,7 @@ A complete end-to-end DevOps assignment implementing:
 🛠 Tech Stack
 Layer	         -   Technology
 Frontend	     -   React, Vite, TypeScript
-Backend	         -   Django 6.0 (REST API)
+Backend	         -   Django 4.2.11 (REST API)
 Containers	     -   Docker, Docker Compose
 CI/CD	         -   GitHub Actions
 Deployment	     -   Local VM / Cloud VM

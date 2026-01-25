@@ -22,8 +22,8 @@ RUN mkdir -p /app/data && chown -R appuser:appuser /app
 
 USER appuser
 
-COPY --from=builder /install /usr/local
-COPY . .
+COPY --chown=appuser:appuser --from=builder /install /usr/local
+COPY --chown=appuser:appuser . .
 
 ENV DJANGO_SETTINGS_MODULE=config.settings
 ENV DEBUG=False
