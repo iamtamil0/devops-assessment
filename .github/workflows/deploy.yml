@@ -3,55 +3,49 @@ name: CI/CD Deployment Pipeline
 on:
   push:
     branches:
-        - main
+      - main
 
 jobs:
-    build_and_push:
-        runs-on: ubuntu-latest
+  build_and_push:
+    runs-on: ubuntu-latest
 
-        steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-        - name: Login to DockerHub
-          uses: docker/login-action@v2
-          with:
-            username: ${{ secrets.DOCKER_USERNAME }}
-            password: ${{ secrets.DOCKER_TOKEN }}
-        
-        - name: Build Backend Image
-          run: |
-            docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-        - name: Build Frontend image
-          run: |
-            docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
-        
-        - name: Push images
-          run: |
-            docker push ${{ secrets.DOCKER_USERNAME }}/backend:Latest
-            docker push ${{ secrets.DOCKER_USERNAME }}/frontend:Latest
+    - name: Build Backend Image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
 
-    deploy:
-        needs: build_and_push
-        runs-on: ubuntu-Latest
+    - name: Build Frontend Image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
 
-        steps:
-         - name: Deploy to Server
-           uses: appleboy/ssh-action@v0.1.7
-           with:
-             host: ${{ secrets.SERVER_HOST }}
-             username: ${{ secrets.SERVER_USER }}
-             key: ${{ secrets.SERVER_SSH_KEY }}
-             script: |
-                docker pull ${{ secrets.DOCKER_USERNAME }}/backend:Latest
-                docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:Latest
-                docker-compose down
-                dcoker-compose up -d
-         - name: Login to ECR
-           uses: docker/login-action@v2
-           with:
-             username: ${{ secrets.DOCKER_USERNAME }}
-             password: ${{ secrets.DOCKERHUB_PASSWORD }}
-             ecr: auto
-             logout: true
+    - name: Push Images
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+
+  deploy:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy to Server
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          cd /app
+          docker pull ${{ secrets.DOCKER_USERNAME }}/backend:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+          docker-compose down
+          docker-compose up -d
